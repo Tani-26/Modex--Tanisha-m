@@ -1,0 +1,232 @@
+openapi: 3.0.0
+info:
+  title: Ticket Booking System API
+  version: 1.0.0
+  description: API documentation for the Ticket Booking System
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+
+components:
+  schemas:
+    Show:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        totalSeats:
+          type: integer
+        availableSeats:
+          type: integer
+        status:
+          type: string
+          enum: [ACTIVE, CANCELLED, COMPLETED]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        showId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        numberOfSeats:
+          type: integer
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, FAILED]
+        expiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+paths:
+  /shows:
+    get:
+      summary: Get all active shows
+      responses:
+        '200':
+          description: List of shows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Show'
+    
+    post:
+      summary: Create a new show
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - startTime
+                - totalSeats
+              properties:
+                name:
+                  type: string
+                startTime:
+                  type: string
+                  format: date-time
+                totalSeats:
+                  type: integer
+                  minimum: 1
+      responses:
+        '201':
+          description: Show created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Show'
+
+  /shows/{id}:
+    get:
+      summary: Get show by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Show details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Show'
+
+  /bookings:
+    post:
+      summary: Create a new booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - showId
+                - userId
+                - numberOfSeats
+              properties:
+                showId:
+                  type: string
+                  format: uuid
+                userId:
+                  type: string
+                  format: uuid
+                numberOfSeats:
+                  type: integer
+                  minimum: 1
+      responses:
+        '201':
+          description: Booking created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+
+  /bookings/{id}:
+    get:
+      summary: Get booking status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Booking details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+
+  /bookings/user/{userId}:
+    get:
+      summary: Get user's bookings
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of user's bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
+
+  /bookings/{id}/confirm:
+    post:
+      summary: Confirm a booking
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Booking confirmed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+
+  /bookings/{id}/cancel:
+    post:
+      summary: Cancel a booking
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Booking cancelled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string 
